@@ -1,11 +1,11 @@
-import { Request, Response, NextFunction } from "express";
-import path from "path";
+import { Request, Response, NextFunction } from 'express';
+import path from 'path';
 
-export const uploadFile = (req: Request, res: Response, next: NextFunction) => {
+const uploadFile = (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.file) {
       return res.status(400).json({
-        message: "Файл не передан",
+        message: 'Файл не передан',
       });
     }
 
@@ -17,3 +17,5 @@ export const uploadFile = (req: Request, res: Response, next: NextFunction) => {
     return next(error);
   }
 };
+
+export default uploadFile;

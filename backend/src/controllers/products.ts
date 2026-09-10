@@ -1,9 +1,8 @@
-import { Request, Response, NextFunction } from "express";
-import Product from "../models/product";
-import path from "path";
-import { NotFoundError } from "../errors/not-found-error";
-import { moveFileToImages } from "../utils/file";
-import fs from "fs/promises";
+import { Request, Response, NextFunction } from 'express';
+import path from 'path';
+import Product from '../models/product';
+import NotFoundError from '../errors/not-found-error';
+import moveFileToImages from '../utils/file';
 
 export const getProducts = async (
   _req: Request,
@@ -55,7 +54,7 @@ export const updateProduct = async (
     const product = await Product.findById(productId);
 
     if (!product) {
-      return next(new NotFoundError("Товар не найден"));
+      return next(new NotFoundError('Товар не найден'));
     }
 
     if (req.body.image?.fileName) {
@@ -87,7 +86,7 @@ export const deleteProduct = async (
     const product = await Product.findByIdAndDelete(productId);
 
     if (!product) {
-      return next(new NotFoundError("Товар не найден"));
+      return next(new NotFoundError('Товар не найден'));
     }
 
     return res.status(200).send(product);

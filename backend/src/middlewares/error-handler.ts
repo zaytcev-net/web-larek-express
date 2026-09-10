@@ -1,15 +1,15 @@
-import { Request, Response, NextFunction } from "express";
-import mongoose from "mongoose";
-import { isCelebrateError } from "celebrate";
+import { Request, Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
+import { isCelebrateError } from 'celebrate';
 
-import { BadRequestError } from "../errors/bad-request-error";
-import { ConflictError } from "../errors/conflict-error";
+import BadRequestError from '../errors/bad-request-error';
+import ConflictError from '../errors/conflict-error';
 
-export const errorHandler = (
+const errorHandler = (
   err: Error & { statusCode?: number; code?: number },
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction,
+  _next: NextFunction,
 ) => {
   if (isCelebrateError(err)) {
     const error = new BadRequestError();
@@ -32,7 +32,7 @@ export const errorHandler = (
   }
 
   if (err.code === 11000) {
-    const error = new ConflictError("Товар с таким названием уже существует");
+    const error = new ConflictError('Товар с таким названием уже существует');
 
     res.status(error.statusCode).json({
       message: error.message,
@@ -44,6 +44,8 @@ export const errorHandler = (
   const statusCode = err.statusCode || 500;
 
   res.status(statusCode).json({
-    message: err.message || "Внутренняя ошибка сервера",
+    message: err.message || 'Внутренняя ошибка сервера',
   });
 };
+
+export default errorHandler;

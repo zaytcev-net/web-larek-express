@@ -1,17 +1,18 @@
-import mongoose from "mongoose";
-import { Request, Response, NextFunction } from "express";
-import { BaseError } from "../errors/base-error";
-import config from "../config";
-import bcrypt from "bcryptjs";
-import ms from "ms";
-import { CookieOptions } from "express";
+import mongoose from 'mongoose';
+import {
+  Request, Response, NextFunction, CookieOptions,
+} from 'express';
+import bcrypt from 'bcryptjs';
+import ms from 'ms';
+import BaseError from '../errors/base-error';
+import config from '../config';
 
-import User from "../models/user";
+import User from '../models/user';
 import {
   createAccessToken,
   createRefreshToken,
   verifyRefreshToken,
-} from "../utils/token";
+} from '../utils/token';
 
 interface RegisterBody {
   name?: string;
@@ -26,10 +27,10 @@ interface LoginBody {
 
 const refreshTokenCookieOptions: CookieOptions = {
   httpOnly: true,
-  sameSite: "lax",
+  sameSite: 'lax',
   secure: false,
-  maxAge: ms(config.authRefreshTokenExpiry || "7d"),
-  path: "/",
+  maxAge: ms(config.authRefreshTokenExpiry || '7d'),
+  path: '/',
 };
 
 export const register = async (
@@ -59,7 +60,7 @@ export const register = async (
 
     await user.save();
 
-    res.cookie("refreshToken", refreshToken, refreshTokenCookieOptions);
+    res.cookie('refreshToken', refreshToken, refreshTokenCookieOptions);
 
     return res.status(201).json({
       user: {
@@ -82,16 +83,16 @@ export const login = async (
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email }).select("+password +tokens");
+    const user = await User.findOne({ email }).select('+password +tokens');
 
     if (!user) {
-      return next(new BaseError("Неверный email или пароль", 401));
+      return next(new BaseError('Неверный email или пароль', 401));
     }
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
     if (!isPasswordCorrect) {
-      return next(new BaseError("Неверный email или пароль", 401));
+      return next(new BaseError('Неверный email или пароль', 401));
     }
 
     const accessToken = createAccessToken(user._id.toString());
@@ -104,7 +105,7 @@ export const login = async (
 
     await user.save();
 
-    res.cookie("refreshToken", refreshToken, refreshTokenCookieOptions);
+    res.cookie('refreshToken', refreshToken, refreshTokenCookieOptions);
 
     return res.status(200).json({
       user: {
@@ -125,24 +126,24 @@ export const refreshAccessToken = async (
   next: NextFunction,
 ) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
+    const { refreshToken } = req.cookies;
 
     if (!refreshToken) {
-      return next(new BaseError("Необходима авторизация", 401));
+      return next(new BaseError('Необходима авторизация', 401));
     }
 
     const payload = verifyRefreshToken(refreshToken);
 
-    const user = await User.findById(payload._id).select("+tokens");
+    const user = await User.findById(payload._id).select('+tokens');
 
     if (!user) {
-      return next(new BaseError("Пользователь не найден", 401));
+      return next(new BaseError('Пользователь не найден', 401));
     }
 
     const tokenExists = user.tokens.some((item) => item.token === refreshToken);
 
     if (!tokenExists) {
-      return next(new BaseError("Недействительный refresh token", 401));
+      return next(new BaseError('Недействительный refresh token', 401));
     }
 
     const accessToken = createAccessToken(user._id.toString());
@@ -157,7 +158,7 @@ export const refreshAccessToken = async (
 
     await user.save();
 
-    res.cookie("refreshToken", newRefreshToken, refreshTokenCookieOptions);
+    res.cookie('refreshToken', newRefreshToken, refreshTokenCookieOptions);
 
     return res.status(200).json({
       user: {
@@ -168,7 +169,7 @@ export const refreshAccessToken = async (
       accessToken,
     });
   } catch (error) {
-    return next(new BaseError("Недействительный refresh token", 401));
+    return next(new BaseError('Недействительный refresh token', 401));
   }
 };
 
@@ -178,10 +179,10 @@ export const logout = async (
   next: NextFunction,
 ) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
+    const { refreshToken } = req.cookies;
 
     if (!refreshToken) {
-      return next(new BaseError("Необходима авторизация", 401));
+      return next(new BaseError('Необходима авторизация', 401));
     }
 
     let payload;
@@ -189,24 +190,24 @@ export const logout = async (
     try {
       payload = verifyRefreshToken(refreshToken);
     } catch (error) {
-      return next(new BaseError("Недействительный refresh token", 401));
+      return next(new BaseError('Недействительный refresh token', 401));
     }
 
     if (!mongoose.Types.ObjectId.isValid(payload._id)) {
-      return next(new BaseError("Некорректный ID пользователя", 400));
+      return next(new BaseError('Некорректный ID пользователя', 400));
     }
 
-    const user = await User.findById(payload._id).select("+tokens");
+    const user = await User.findById(payload._id).select('+tokens');
 
     if (!user) {
-      return next(new BaseError("Пользователь не найден", 404));
+      return next(new BaseError('Пользователь не найден', 404));
     }
 
     user.tokens = user.tokens.filter((item) => item.token !== refreshToken);
 
     await user.save();
 
-    res.cookie("refreshToken", "", {
+    res.cookie('refreshToken', '', {
       ...refreshTokenCookieOptions,
       maxAge: 0,
     });
@@ -228,7 +229,7 @@ export const getCurrentUser = async (
     const user = await User.findById(req.userId);
 
     if (!user) {
-      return next(new BaseError("Пользователь не найден", 404));
+      return next(new BaseError('Пользователь не найден', 404));
     }
 
     return res.status(200).json({

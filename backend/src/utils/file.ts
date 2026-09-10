@@ -1,10 +1,10 @@
-import fs from "fs/promises";
-import path from "path";
-import config from "../config";
+import fs from 'fs/promises';
+import path from 'path';
+import config from '../config';
 
-const publicPath = path.join(__dirname, "../public");
+const publicPath = path.join(__dirname, '../public');
 
-export const moveFileToImages = async (fileName: string) => {
+const moveFileToImages = async (fileName: string) => {
   const sourcePath = path.join(publicPath, config.uploadPathTemp, fileName);
 
   const destinationPath = path.join(publicPath, config.uploadPath, fileName);
@@ -17,3 +17,5 @@ export const moveFileToImages = async (fileName: string) => {
 
   await fs.rename(sourcePath, destinationPath);
 };
+
+export default moveFileToImages;

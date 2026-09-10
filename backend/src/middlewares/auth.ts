@@ -1,20 +1,20 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from 'express';
 
-import { verifyAccessToken } from "../utils/token";
-import { BaseError } from "../errors/base-error";
+import { verifyAccessToken } from '../utils/token';
+import BaseError from '../errors/base-error';
 
-export const auth = (req: Request, _res: Response, next: NextFunction) => {
+const auth = (req: Request, _res: Response, next: NextFunction) => {
   try {
-    const authorization = req.headers.authorization;
+    const { authorization } = req.headers;
 
     if (!authorization) {
-      return next(new BaseError("Необходима авторизация", 401));
+      return next(new BaseError('Необходима авторизация', 401));
     }
 
-    const [type, token] = authorization.split(" ");
+    const [type, token] = authorization.split(' ');
 
-    if (type !== "Bearer" || !token) {
-      return next(new BaseError("Необходима авторизация", 401));
+    if (type !== 'Bearer' || !token) {
+      return next(new BaseError('Необходима авторизация', 401));
     }
 
     const payload = verifyAccessToken(token);
@@ -23,6 +23,8 @@ export const auth = (req: Request, _res: Response, next: NextFunction) => {
 
     return next();
   } catch (error) {
-    return next(new BaseError("Необходима авторизация", 401));
+    return next(new BaseError('Необходима авторизация', 401));
   }
 };
+
+export default auth;

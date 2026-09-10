@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router } from 'express';
 
 import {
   login,
@@ -6,22 +6,22 @@ import {
   refreshAccessToken,
   logout,
   getCurrentUser,
-} from "../controllers/auth";
+} from '../controllers/auth';
 
-import { validateLogin, validateRegister } from "../middlewares/validation";
+import { validateLogin, validateRegister } from '../middlewares/validation';
 
-import { auth } from "../middlewares/auth";
+import auth from '../middlewares/auth';
 
 const authRouter = Router();
 
-authRouter.post("/login", validateLogin, login);
+authRouter.post('/login', validateLogin, login);
 
-authRouter.post("/register", validateRegister, register);
+authRouter.post('/register', validateRegister, register);
 
-authRouter.get("/token", refreshAccessToken);
+authRouter.get('/token', refreshAccessToken);
 
-authRouter.get("/logout", logout);
+authRouter.get('/logout', logout);
 
-authRouter.get("/user", auth, getCurrentUser);
+authRouter.get('/user', auth, getCurrentUser);
 
 export default authRouter;

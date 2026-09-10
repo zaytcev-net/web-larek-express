@@ -1,12 +1,12 @@
-import { Request, Response, NextFunction } from "express";
-import mongoose from "mongoose";
-import { faker } from "@faker-js/faker";
+import { Request, Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
+import { faker } from '@faker-js/faker';
 
-import Product from "../models/product";
-import { BadRequestError } from "../errors/bad-request-error";
+import Product from '../models/product';
+import BadRequestError from '../errors/bad-request-error';
 
 interface OrderBody {
-  payment: "card" | "online";
+  payment: 'card' | 'online';
   email: string;
   phone: string;
   address: string;
@@ -14,7 +14,7 @@ interface OrderBody {
   items: string[];
 }
 
-export const createOrder = async (
+const createOrder = async (
   req: Request<{}, {}, OrderBody>,
   res: Response,
   next: NextFunction,
@@ -22,44 +22,49 @@ export const createOrder = async (
   try {
     const { items, total } = req.body;
 
-    // Проверяем ID товаров
-    for (const itemId of items) {
-      if (!mongoose.Types.ObjectId.isValid(itemId)) {
-        return next(new BadRequestError("Передан не валидный ID товара"));
-      }
+    const invalidItemId = items.find(
+      (itemId) => !mongoose.Types.ObjectId.isValid(itemId),
+    );
+
+    if (invalidItemId) {
+      return next(new BadRequestError('Передан не валидный ID товара'));
     }
 
-    // Получаем товары из базы
     const products = await Product.find({
       _id: { $in: items },
     });
 
-    // Проверяем существование каждого товара
-    for (const itemId of items) {
-      const product = products.find((item) => item._id.toString() === itemId);
+    const missingProductId = items.find(
+      (itemId) => !products.some((product) => product._id.toString() === itemId),
+    );
 
-      if (!product) {
-        return next(new BadRequestError(`Товар с id ${itemId} не найден`));
-      }
-
-      // Проверяем, продаётся ли товар
-      if (product.price === null) {
-        return next(new BadRequestError(`Товар с id ${itemId} не продается`));
-      }
+    if (missingProductId) {
+      return next(
+        new BadRequestError(`Товар с id ${missingProductId} не найден`),
+      );
     }
 
-    // Считаем настоящую сумму заказа
+    const unavailableProductId = items.find((itemId) => {
+      const product = products.find((item) => item._id.toString() === itemId);
+
+      return product?.price === null;
+    });
+
+    if (unavailableProductId) {
+      return next(
+        new BadRequestError(`Товар с id ${unavailableProductId} не продается`),
+      );
+    }
+
     const calculatedTotal = products.reduce(
       (sum, product) => sum + (product.price ?? 0),
       0,
     );
 
-    // Проверяем total
     if (calculatedTotal !== total) {
-      return next(new BadRequestError("Неверная сумма заказа"));
+      return next(new BadRequestError('Неверная сумма заказа'));
     }
 
-    // Заказ в БД НЕ сохраняем
     const id = faker.string.uuid();
 
     return res.status(200).send({
@@ -70,3 +75,5 @@ export const createOrder = async (
     return next(err);
   }
 };
+
+export default createOrder;

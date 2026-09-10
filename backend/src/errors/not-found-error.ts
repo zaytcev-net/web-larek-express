@@ -1,7 +1,9 @@
-import { BaseError } from "./base-error";
+import BaseError from './base-error';
 
-export class NotFoundError extends BaseError {
-  constructor(message = "Ресурс не найден") {
+class NotFoundError extends BaseError {
+  constructor(message: string) {
     super(message, 404);
   }
 }
+
+export default NotFoundError;

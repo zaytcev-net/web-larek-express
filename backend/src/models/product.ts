@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
-import fs from "fs/promises";
-import path from "path";
+import mongoose from 'mongoose';
+import fs from 'fs/promises';
+import path from 'path';
 
 interface IImage {
   fileName: string;
@@ -48,22 +48,24 @@ const productSchema = new mongoose.Schema<IProduct>({
   },
 });
 
-productSchema.post("findOneAndDelete", async (product) => {
+productSchema.post('findOneAndDelete', async (product) => {
   if (!product?.image?.fileName) {
     return;
   }
 
   const fileName = path.basename(product.image.fileName);
 
-  const imagePath = path.join(__dirname, "../public", "images", fileName);
+  const imagePath = path.join(__dirname, '../public', 'images', fileName);
 
   try {
     await fs.unlink(imagePath);
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+    const fileError = error as { code?: string };
+
+    if (fileError.code !== 'ENOENT') {
       throw error;
     }
   }
 });
 
-export default mongoose.model<IProduct>("product", productSchema);
+export default mongoose.model<IProduct>('product', productSchema);
