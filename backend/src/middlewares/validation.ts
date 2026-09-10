@@ -35,3 +35,40 @@ export const validateCreateOrder = celebrate({
       .required(),
   }),
 });
+
+export const validateLogin = celebrate({
+  [Segments.BODY]: Joi.object({
+    email: Joi.string().email().required(),
+
+    password: Joi.string().min(6).required(),
+  }),
+});
+
+export const validateRegister = celebrate({
+  [Segments.BODY]: Joi.object({
+    name: Joi.string().min(2).max(30).optional(),
+
+    email: Joi.string().email().required(),
+
+    password: Joi.string().min(6).required(),
+  }),
+});
+
+export const validateUpdateProduct = celebrate({
+  [Segments.BODY]: Joi.object({
+    title: Joi.string().min(2).max(30),
+    image: Joi.object({
+      fileName: Joi.string().required(),
+      originalName: Joi.string().required(),
+    }),
+    category: Joi.string(),
+    description: Joi.string(),
+    price: Joi.number().allow(null),
+  }).min(1),
+});
+
+export const validateProductId = celebrate({
+  [Segments.PARAMS]: Joi.object({
+    productId: Joi.string().hex().length(24).required(),
+  }),
+});

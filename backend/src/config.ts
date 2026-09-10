@@ -1,4 +1,5 @@
 import "dotenv/config";
+import type { StringValue } from "ms";
 
 const config = {
   port: process.env.PORT || "3000",
@@ -11,9 +12,13 @@ const config = {
 
   originAllow: process.env.ORIGIN_ALLOW || "http://localhost:5173",
 
-  authRefreshTokenExpiry: process.env.AUTH_REFRESH_TOKEN_EXPIRY || "7d",
+  authRefreshTokenExpiry: (process.env.AUTH_REFRESH_TOKEN_EXPIRY ||
+    "7d") as StringValue,
 
-  authAccessTokenExpiry: process.env.AUTH_ACCESS_TOKEN_EXPIRY || "1m",
+  authAccessTokenExpiry: (process.env.AUTH_ACCESS_TOKEN_EXPIRY ||
+    "10m") as StringValue,
+
+  jwtSecret: process.env.JWT_SECRET || "development-secret",
 };
 
 export default config;

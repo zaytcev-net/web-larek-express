@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import fs from "fs/promises";
+import path from "path";
 
 interface IImage {
   fileName: string;
@@ -44,6 +46,24 @@ const productSchema = new mongoose.Schema<IProduct>({
     type: Number,
     default: null,
   },
+});
+
+productSchema.post("findOneAndDelete", async (product) => {
+  if (!product?.image?.fileName) {
+    return;
+  }
+
+  const fileName = path.basename(product.image.fileName);
+
+  const imagePath = path.join(__dirname, "../public", "images", fileName);
+
+  try {
+    await fs.unlink(imagePath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      throw error;
+    }
+  }
 });
 
 export default mongoose.model<IProduct>("product", productSchema);
