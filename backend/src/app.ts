@@ -37,6 +37,15 @@ app.use(errorLogger);
 app.use(notFound);
 app.use(errorHandler);
 
-mongoose.connect(config.dbAddress).then(() => {
-  app.listen(config.port);
-});
+mongoose
+  .connect(config.dbAddress)
+  .then(() => {
+    console.log('MongoDB connected');
+
+    app.listen(config.port, () => {
+      console.log(`Server started on port ${config.port}`);
+    });
+  })
+  .catch((error) => {
+    console.error('MongoDB connection error:', error);
+  });
