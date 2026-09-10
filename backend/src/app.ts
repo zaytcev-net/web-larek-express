@@ -41,11 +41,11 @@ mongoose
   .connect(config.dbAddress)
   .then(() => {
     console.log('MongoDB connected');
-
-    app.listen(config.port, () => {
-      console.log(`Server started on port ${config.port}`);
-    });
   })
   .catch((error) => {
     console.error('MongoDB connection error:', error);
   });
+
+app.listen(config.port, () => {
+  console.log(`Server started on port ${config.port}`);
+});
