@@ -35,6 +35,13 @@ jobs:
     - name: Get testing lib
       run: set -eu && git clone --depth 1 $REP_TESTS $DIR_TESTS
     - name: Start project
-      run: bash $DIR_TESTS/bin/start_project.sh
+      run: |
+        bash $DIR_TESTS/bin/start_project.sh
+        echo "===== DOCKER PS ====="
+        docker compose ps
+        echo "===== BACKEND LOGS ====="
+        docker compose logs backend --tail=100
+        echo "===== SERVER LOGS ====="
+        docker compose logs server --tail=100
     - name: Run tests
       run: bash $DIR_TESTS/bin/endpoints.sh
